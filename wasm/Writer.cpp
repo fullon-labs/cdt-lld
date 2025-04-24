@@ -930,7 +930,7 @@ void Writer::createDispatchFunction() {
       writeU8(os, OPCODE_CALL, "CALL");
       auto func_sym = (FunctionSymbol*)symtab->find(str.substr(str.find(":")+1));
       uint32_t index = func_sym->getFunctionIndex();
-      if (index >= 0)
+      if (index != INVALID_INDEX)
          writeUleb128(os, index, "index");
       else
          throw std::runtime_error("wasm_ld internal error function not found");
