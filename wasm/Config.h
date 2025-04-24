@@ -14,6 +14,7 @@
 #include "llvm/BinaryFormat/Wasm.h"
 #include "llvm/Support/CachePruning.h"
 #include "llvm/Object/Wasm.h"
+#include "ChainConfig.h"
 
 namespace lld {
 namespace wasm {

@@ -962,13 +962,13 @@ void Writer::createDispatchFunction() {
       if (act_cnt > 0)
         writeU8(OS, OPCODE_ELSE, "ELSE");
 
-      // do not fail if self == eosio
+      // do not fail if self == CHAIN_SYSTEM_ACCOUNT_NAME
       writeU8(OS, OPCODE_GET_LOCAL, "GET_LOCAL");
       writeUleb128(OS, 0, "self");
       writeU8(OS, OPCODE_I64_CONST, "I64.CONST");
-      encodeSLEB128((int64_t)eosio::cdt::string_to_name("eosio"), OS);
+      encodeSLEB128((int64_t)eosio::cdt::string_to_name(CHAIN_SYSTEM_ACCOUNT_NAME), OS);
       writeU8(OS, OPCODE_I64_NE, "I64.NE");
-      writeU8(OS, OPCODE_IF, "if receiver != eosio");
+      writeU8(OS, OPCODE_IF, "if receiver != " CHAIN_SYSTEM_ACCOUNT_NAME);
       writeU8(OS, 0x40, "none");
 
       if (assert_sym && assert_idx < symtab->getSymbols().size()) {
@@ -1026,7 +1026,7 @@ void Writer::createDispatchFunction() {
       bool has_onerror_handler = false;
       if (not_cnt > 0) {
          for (auto const& notif0 : notify_handlers) {
-            if (notif0.first == "eosio") {
+            if (notif0.first == CHAIN_SYSTEM_ACCOUNT_NAME) {
                for (auto const& notif1 : notif0.second) {
                   if (notif1.substr(0, notif1.find(":")) == "onerror") {
                      has_onerror_handler = true;
@@ -1039,12 +1039,12 @@ void Writer::createDispatchFunction() {
       if (!has_onerror_handler) {
          // assert on onerror
          writeU8(OS, OPCODE_I64_CONST, "I64.CONST");
-         uint64_t acnt = eosio::cdt::string_to_name("eosio");
+         uint64_t acnt = eosio::cdt::string_to_name(CHAIN_SYSTEM_ACCOUNT_NAME);
          encodeSLEB128((int64_t)acnt, OS);
          writeU8(OS, OPCODE_GET_LOCAL, "GET_LOCAL");
          writeUleb128(OS, 1, "code");
          writeU8(OS, OPCODE_I64_EQ, "I64.EQ");
-         writeU8(OS, OPCODE_IF, "IF code==eosio");
+         writeU8(OS, OPCODE_IF, "IF code==" CHAIN_SYSTEM_ACCOUNT_NAME);
          writeU8(OS, 0x40, "none");
          writeU8(OS, OPCODE_I64_CONST, "I64.CONST");
          uint64_t nm = eosio::cdt::string_to_name("onerror");
@@ -1213,7 +1213,7 @@ void Writer::createDispatchFunction() {
 
         writeU8(OS, OPCODE_I32_CONST, "i32.const");
         writeUleb128(OS, desym->getGlobalIndex() + 8, "__data_end + 8");
-        
+
         writeU8(OS, OPCODE_I64_LOAD, "i64.load");
         writeUleb128(OS, 3, "align=8");
         writeUleb128(OS, 0, "offset=0");
@@ -1297,8 +1297,10 @@ void Writer::run(bool undefinedEntry) {
   if (!config->relocatable && config->sharedMemory && !config->shared)
     createInitTLSFunction();
 
-  if (!config->otherModel && symtab->entryIsUndefined)
-     createDispatchFunction();
+  if (!config->otherModel && symtab->entryIsUndefined) {
+    log("-- createDispatchFunction");
+    createDispatchFunction();
+  }
 
   if (errorCount())
     return;

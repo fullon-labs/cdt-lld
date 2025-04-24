@@ -163,6 +163,12 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/lld/Common/Version.inc.in
   ${CMAKE_CURRENT_BINARY_DIR}/include/lld/Common/Version.inc)
 
+set(CHAIN_SYSTEM_ACCOUNT_NAME "sys" CACHE STRING "Chain system account name")
+message(STATUS "Using CHAIN_SYSTEM_ACCOUNT_NAME=\"${CHAIN_SYSTEM_ACCOUNT_NAME}\"")
+# Configure the ChainConfig.h file.
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/wasm/ChainConfig.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/wasm/ChainConfig.h)
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(FATAL_ERROR "In-source builds are not allowed. CMake would overwrite "
